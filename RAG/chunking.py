@@ -26,24 +26,22 @@ def add_to_db(docs,author,source,typ):
         for page in reader.pages:
             text += page.extract_text()
 
-        # قراءة الـ PDF وتجميع النص ...
-        
-        # تقسيم أولي آمن
+       
         initial_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=2000,       # ~400–600 توكن، آمن
+            chunk_size=2000,      
             chunk_overlap=200,
             separators=["\n\n", "\n", ". ", "!", "?", " ", ""]
         )
         initial_chunks = initial_splitter.split_text(text)
         
-        # الآن طبق SemanticChunker على كل جزء
+        
         all_semantic_chunks = []
         
         for init_chunk in initial_chunks:
             semantic_chunks = lc_semantic_chunker.create_documents([init_chunk])
             all_semantic_chunks.extend(semantic_chunks)
         
-        # أضف metadata
+       
         for j, doc in enumerate(all_semantic_chunks):
             doc.metadata = {
                 "author": author,
@@ -54,7 +52,7 @@ def add_to_db(docs,author,source,typ):
                 "original_file": i + ".pdf"
             }
         
-        # أضف واحد واحد عشان أمان إضافي
+       
         for doc in all_semantic_chunks:
             vectordb.add_documents([doc])
         print("Finished processing:", i, "Total chunks added:", len(all_semantic_chunks))
